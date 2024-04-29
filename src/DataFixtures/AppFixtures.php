@@ -3,11 +3,16 @@
 namespace App\DataFixtures;
 
 use App\Entity\Car;
+use App\Entity\User;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
+use Faker\Factory;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 class AppFixtures extends Fixture
 {
+    public function __construct(private readonly UserPasswordHasherInterface $passwordHasher){}
+
     const CARS = [
         'Audi' => [
             'A1',
@@ -593,6 +598,8 @@ class AppFixtures extends Fixture
 
     public function load(ObjectManager $manager): void
     {
+        $faker = Factory::create('fr_FR');
+
         foreach (self::CARS as $brand => $models)
         {
             $numberOfModels = rand(5, 10); // Random number of models between 5 and 10
@@ -609,6 +616,32 @@ class AppFixtures extends Fixture
                 $car->setMatricule($matricule);
                 $manager->persist($car);
             }
+        }
+
+        $user = new User();
+        $user->setEmail('maa@mail.com')
+            ->setPassword($this->passwordHasher->hashPassword($user, 'password'))
+            ->setRoles(['ROLE_ADMIN'])
+            ->setFirstname('Maamoune')
+            ->setLastname('Hassane')
+        ;
+
+        $manager->persist($user);
+
+        // Create 10 users all with the same password 'password'
+        for ($i = 0; $i < 10; $i++)
+        {
+            $isAdministrator = $faker->boolean(10); // 10% chance to be an administrator
+
+            $user = new User();
+            $user->setEmail($faker->email)
+                 ->setPassword($this->passwordHasher->hashPassword($user, 'password'))
+                 ->setRoles($isAdministrator ? ['ROLE_ADMIN'] : [])
+                ->setFirstname($faker->firstName)
+                ->setLastname($faker->lastName)
+            ;
+
+            $manager->persist($user);
         }
 
         $manager->flush();
