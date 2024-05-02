@@ -19,29 +19,30 @@ class Car
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['car:read'])]
+    #[Groups(['car:read', 'reservation:item:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 100)]
-    #[Groups(['car:read', 'car:write'])]
+    #[Groups(['car:read', 'car:write', 'reservation:item:read'])]
     private ?string $brand = null;
 
     #[ORM\Column(length: 100)]
-    #[Groups(['car:read', 'car:write'])]
+    #[Groups(['car:read', 'car:write', 'reservation:item:read'])]
     private ?string $model = null;
 
     #[ORM\Column(length: 15)]
-    #[Groups(['car:read', 'car:write'])]
+    #[Groups(['car:read', 'car:write', 'reservation:item:read'])]
     private ?string $matricule = null;
 
     #[ORM\Column(length: 25)]
-    #[Groups(['car:read', 'car:write'])]
+    #[Groups(['car:read', 'car:write', 'reservation:item:read'])]
     private ?string $color = null;
 
     /**
      * @var Collection<int, Reservation>
      */
     #[ORM\OneToMany(targetEntity: Reservation::class, mappedBy: 'car')]
+    #[Groups(['car:read', 'car:write'])]
     private Collection $reservations;
 
     public function __construct()

@@ -9,18 +9,21 @@ use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
+use App\Enum\ReservationStatusEnum;
 use App\Repository\ReservationRepository;
 use DateTime;
 use DateTimeImmutable;
+use DateTimeInterface;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use InvalidArgumentException;
 use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: ReservationRepository::class)]
 #[ORM\HasLifecycleCallbacks]
 #[ApiResource(
     operations: [
-        new GetCollection(),
+        new GetCollection(normalizationContext: ['groups' => ['reservation:collection:read']]),
         new Post(
             uriTemplate: '/reservations',
             controller: 'App\Controller\ReservationController::add',
@@ -33,7 +36,7 @@ use Symfony\Component\Serializer\Attribute\Groups;
         new Delete(),
         new Patch()
     ],
-    normalizationContext: ['groups' => ['reservation:read']],
+    normalizationContext: ['groups' => ['reservation:collection:read', 'reservation:item:read']],
     denormalizationContext: ['groups' => ['reservation:write']],
 )]
 class Reservation
@@ -46,37 +49,37 @@ class Reservation
 
     #[ORM\ManyToOne(inversedBy: 'reservations')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(['reservation:read', 'reservation:write'])]
+    #[Groups(['reservation:collection:read', 'reservation:item:read', 'reservation:write'])]
     private ?User $user = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
-    #[Groups(['reservation:read', 'reservation:write'])]
-    private ?\DateTimeInterface $startDate = null;
+    #[Groups(['reservation:collection:read', 'reservation:item:read', 'reservation:write'])]
+    private ?DateTimeInterface $startDate = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
-    #[Groups(['reservation:read', 'reservation:write'])]
-    private ?\DateTimeInterface $endDate = null;
+    #[Groups(['reservation:collection:read', 'reservation:item:read', 'reservation:write'])]
+    private ?DateTimeInterface $endDate = null;
 
     #[ORM\ManyToOne(inversedBy: 'reservations')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(['reservation:read', 'reservation:write'])]
+    #[Groups(['reservation:collection:read', 'reservation:item:read', 'reservation:write'])]
     private ?Car $car = null;
 
     #[ORM\Column(type: Types::SMALLINT)]
-    #[Groups(['reservation:read', 'reservation:write'])]
+    #[Groups(['reservation:collection:read', 'reservation:item:read', 'reservation:write'])]
     private ?int $status = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
-    #[Groups(['reservation:read', 'reservation:write'])]
+    #[Groups(['reservation:collection:read', 'reservation:item:read', 'reservation:write'])]
     private ?string $note = null;
 
     #[ORM\Column]
-    #[Groups(['reservation:read'])]
+    #[Groups(['reservation:collection:read', 'reservation:item:read'])]
     private ?DateTimeImmutable $createdAt = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
-    #[Groups(['reservation:read'])]
-    private ?\DateTimeInterface $updatedAt = null;
+    #[Groups(['reservation:collection:read', 'reservation:item:read'])]
+    private ?DateTimeInterface $updatedAt = null;
 
     /**
      * set the createdAt date automatically when a new reservation is created
@@ -115,24 +118,24 @@ class Reservation
         return $this;
     }
 
-    public function getStartDate(): ?\DateTimeInterface
+    public function getStartDate(): ?DateTimeInterface
     {
         return $this->startDate;
     }
 
-    public function setStartDate(\DateTimeInterface $startDate): static
+    public function setStartDate(DateTimeInterface $startDate): static
     {
         $this->startDate = $startDate;
 
         return $this;
     }
 
-    public function getEndDate(): ?\DateTimeInterface
+    public function getEndDate(): ?DateTimeInterface
     {
         return $this->endDate;
     }
 
-    public function setEndDate(\DateTimeInterface $endDate): static
+    public function setEndDate(DateTimeInterface $endDate): static
     {
         $this->endDate = $endDate;
 
@@ -156,8 +159,40 @@ class Reservation
         return $this->status;
     }
 
-    public function setStatus(int $status): static
+    #[Groups(['reservation:collection:read', 'reservation:item:read'])]
+    public function getStatusEnum(bool $name = true): ReservationStatusEnum|string
     {
+        $enum = match ($this->status) {
+            0 => ReservationStatusEnum::Cancel,
+            1 => ReservationStatusEnum::Submitted,
+            2 => ReservationStatusEnum::Confirmed,
+            3 => ReservationStatusEnum::CarTaken,
+            5 => ReservationStatusEnum::CarReturned,
+            6 => ReservationStatusEnum::Incident,
+        };
+
+        return $name ? $enum->name : $enum;
+    }
+
+    public function setStatus(ReservationStatusEnum|int $status): static
+    {
+        //if the status is an enum, we convert it to an int
+        if ($status instanceof ReservationStatusEnum) {
+            $status = match ($status) {
+                ReservationStatusEnum::Cancel => 0,
+                ReservationStatusEnum::Submitted => 1,
+                ReservationStatusEnum::Confirmed => 2,
+                ReservationStatusEnum::CarTaken => 3,
+                ReservationStatusEnum::CarReturned => 4,
+                ReservationStatusEnum::Incident => 5,
+            };
+        }
+
+        //status must be between 0 and 5
+        if ($status < 0 || $status > 5) {
+            throw new InvalidArgumentException('Invalid status');
+        }
+
         $this->status = $status;
 
         return $this;
@@ -187,12 +222,12 @@ class Reservation
         return $this;
     }
 
-    public function getUpdatedAt(): ?\DateTimeInterface
+    public function getUpdatedAt(): ?DateTimeInterface
     {
         return $this->updatedAt;
     }
 
-    public function setUpdatedAt(?\DateTimeInterface $updatedAt): static
+    public function setUpdatedAt(?DateTimeInterface $updatedAt): static
     {
         $this->updatedAt = $updatedAt;
 
