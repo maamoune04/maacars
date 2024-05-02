@@ -31,6 +31,46 @@ use Symfony\Component\Serializer\Attribute\Groups;
             inputFormats: ['json' => ['application/merge-patch+json', 'application/json']],
             controller: UserPasswordHasherController::class
         ),
+        new Get(
+            uriTemplate: '/users/{id}/reservations',
+            controller: 'App\Controller\ReservationController::userReservations',
+            openapiContext: [
+                'summary' => 'Get user reservations',
+                'parameters' => [
+                    [
+                        'in' => 'path',
+                        'name' => 'id',
+                        'required' => true,
+                        'schema' => [
+                            'type' => 'integer',
+                        ],
+                        'example' => '1',
+                    ],
+                ],
+                'responses' => [
+                    '200' => [
+                        'description' => 'User reservations',
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'id' => ['type' => 'integer'],
+                                        'user' => ['type' => 'object'],
+                                        'startDate' => ['type' => 'string', 'format' => 'date'],
+                                        'endDate' => ['type' => 'string', 'format' => 'date'],
+                                        'status' => ['type' => 'string'],
+                                        'car' => ['type' => 'object'],
+                                        'note' => ['type' => 'string'],
+                                        ]
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+            read: false,
+        ),
     ],
     normalizationContext: ['groups' => ['user:read']],
     denormalizationContext: ['groups' => ['user:write']],

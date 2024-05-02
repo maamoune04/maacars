@@ -17,7 +17,9 @@ use DateTimeInterface;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use InvalidArgumentException;
+use Symfony\Component\Serializer\Attribute\Context;
 use Symfony\Component\Serializer\Attribute\Groups;
+use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
 
 #[ORM\Entity(repositoryClass: ReservationRepository::class)]
 #[ORM\HasLifecycleCallbacks]
@@ -54,10 +56,12 @@ class Reservation
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     #[Groups(['reservation:collection:read', 'reservation:item:read', 'reservation:write'])]
+    #[Context(normalizationContext: [DateTimeNormalizer::FORMAT_KEY => 'Y-m-d'])]
     private ?DateTimeInterface $startDate = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     #[Groups(['reservation:collection:read', 'reservation:item:read', 'reservation:write'])]
+    #[Context(normalizationContext: [DateTimeNormalizer::FORMAT_KEY => 'Y-m-d'])]
     private ?DateTimeInterface $endDate = null;
 
     #[ORM\ManyToOne(inversedBy: 'reservations')]
@@ -75,10 +79,12 @@ class Reservation
 
     #[ORM\Column]
     #[Groups(['reservation:collection:read', 'reservation:item:read'])]
+    #[Context(normalizationContext: [DateTimeNormalizer::FORMAT_KEY => 'Y-m-d H:i:s'])]
     private ?DateTimeImmutable $createdAt = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     #[Groups(['reservation:collection:read', 'reservation:item:read'])]
+    #[Context(normalizationContext: [DateTimeNormalizer::FORMAT_KEY => 'Y-m-d H:i:s'])]
     private ?DateTimeInterface $updatedAt = null;
 
     /**

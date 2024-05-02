@@ -41,7 +41,8 @@ security:
     access_control:
          - { path: ^/api/users, roles: NULL, methods: ['POST'] } # for registration
          - { path: ^/api/login, roles: NULL }
-         - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
+         - { path: ^/api, roles: NULL}
+         - { path: ^/api/.*, roles: IS_AUTHENTICATED_FULLY }
 
 when@test:
     security:
