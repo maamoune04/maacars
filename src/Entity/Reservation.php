@@ -20,6 +20,7 @@ use InvalidArgumentException;
 use Symfony\Component\Serializer\Attribute\Context;
 use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: ReservationRepository::class)]
 #[ORM\HasLifecycleCallbacks]
@@ -29,9 +30,26 @@ use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
         new Post(
             uriTemplate: '/reservations',
             controller: 'App\Controller\ReservationController::add',
+            openapiContext: [
+                'summary' => 'Add a new reservation',
+                'requestBody' => [
+                    'content' => [
+                        'application/json' => [
+                            'schema' => [
+                                'type' => 'object',
+                                'properties' => [
+                                    'startDate' => ['type' => 'string', 'format' => 'date'],
+                                    'endDate' => ['type' => 'string', 'format' => 'date'],
+                                    'cars' => ['type' => 'integer', 'example' => 1,],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ],
             read: false,
             write: false,
-            name: 'reservations_add'
+            name: 'reservations_add',
         ),
         new Get(security: "is_granted('ROLE_ADMIN') or object.getUser() == user"),
         new Put(),
@@ -52,25 +70,34 @@ class Reservation
     #[ORM\ManyToOne(inversedBy: 'reservations')]
     #[ORM\JoinColumn(nullable: false)]
     #[Groups(['reservation:collection:read', 'reservation:item:read', 'reservation:write'])]
+    #[Assert\NotBlank]
     private ?User $user = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     #[Groups(['reservation:collection:read', 'reservation:item:read', 'reservation:write'])]
     #[Context(normalizationContext: [DateTimeNormalizer::FORMAT_KEY => 'Y-m-d'])]
+    #[Assert\NotBlank]
+    #[Assert\Type(type: 'DateTimeInterface')]
     private ?DateTimeInterface $startDate = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     #[Groups(['reservation:collection:read', 'reservation:item:read', 'reservation:write'])]
     #[Context(normalizationContext: [DateTimeNormalizer::FORMAT_KEY => 'Y-m-d'])]
+    #[Assert\NotBlank]
+    #[Assert\Type(type: 'DateTimeInterface')]
     private ?DateTimeInterface $endDate = null;
 
     #[ORM\ManyToOne(inversedBy: 'reservations')]
     #[ORM\JoinColumn(nullable: false)]
     #[Groups(['reservation:collection:read', 'reservation:item:read', 'reservation:write'])]
+    #[Assert\NotBlank]
     private ?Car $car = null;
 
     #[ORM\Column(type: Types::SMALLINT)]
     #[Groups(['reservation:collection:read', 'reservation:item:read', 'reservation:write'])]
+    #[Assert\NotBlank]
+    #[Assert\Type(type: 'integer')]
+    #[Assert\Range(min: 0, max: 5)]
     private ?int $status = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]

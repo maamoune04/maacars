@@ -8,6 +8,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Attribute\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: CarRepository::class)]
 #[ApiResource(
@@ -24,18 +25,26 @@ class Car
 
     #[ORM\Column(length: 100)]
     #[Groups(['car:read', 'car:write', 'reservation:item:read'])]
+    #[Assert\NotBlank]
+    #[Assert\Length(max: 100)]
     private ?string $brand = null;
 
     #[ORM\Column(length: 100)]
     #[Groups(['car:read', 'car:write', 'reservation:item:read'])]
+    #[Assert\NotBlank]
+    #[Assert\Length(max: 100)]
     private ?string $model = null;
 
     #[ORM\Column(length: 15)]
     #[Groups(['car:read', 'car:write', 'reservation:item:read'])]
+    #[Assert\NotBlank]
+    #[Assert\Length(min:4, max: 15)]
     private ?string $matricule = null;
 
     #[ORM\Column(length: 25)]
     #[Groups(['car:read', 'car:write', 'reservation:item:read'])]
+    #[Assert\NotBlank]
+    #[Assert\Length(max: 25)]
     private ?string $color = null;
 
     /**
