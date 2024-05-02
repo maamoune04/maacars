@@ -33,10 +33,10 @@ use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
             write: false,
             name: 'reservations_add'
         ),
-        new Get(),
+        new Get(security: "is_granted('ROLE_ADMIN') or object.getUser() == user"),
         new Put(),
         new Delete(),
-        new Patch()
+        new Patch(inputFormats: ['json' => ['application/merge-patch+json', 'application/json']])
     ],
     normalizationContext: ['groups' => ['reservation:collection:read', 'reservation:item:read']],
     denormalizationContext: ['groups' => ['reservation:write']],

@@ -24,7 +24,7 @@ use Symfony\Component\Serializer\Attribute\Groups;
     operations: [
         new GetCollection(),
         new Post(controller: UserPasswordHasherController::class),
-        new Get(),
+        new Get(security: "is_granted('ROLE_ADMIN') or object == user"),
         new Put(controller: UserPasswordHasherController::class),
         new Delete(),
         new Patch(
