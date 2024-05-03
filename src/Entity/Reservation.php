@@ -196,7 +196,7 @@ class Reservation
     public function getStatusEnum(bool $name = true): ReservationStatusEnum|string
     {
         $enum = match ($this->status) {
-            0 => ReservationStatusEnum::Cancel,
+            0 => ReservationStatusEnum::Cancelled,
             1 => ReservationStatusEnum::Submitted,
             2 => ReservationStatusEnum::Confirmed,
             3 => ReservationStatusEnum::CarTaken,
@@ -212,7 +212,7 @@ class Reservation
         //if the status is an enum, we convert it to an int
         if ($status instanceof ReservationStatusEnum) {
             $status = match ($status) {
-                ReservationStatusEnum::Cancel => 0,
+                ReservationStatusEnum::Cancelled => 0,
                 ReservationStatusEnum::Submitted => 1,
                 ReservationStatusEnum::Confirmed => 2,
                 ReservationStatusEnum::CarTaken => 3,
@@ -265,5 +265,21 @@ class Reservation
         $this->updatedAt = $updatedAt;
 
         return $this;
+    }
+
+    /**
+     * @param ReservationStatusEnum $status
+     * @return int
+     */
+    public static function getStatusByEnum(ReservationStatusEnum $status): int
+    {
+        return match ($status) {
+            ReservationStatusEnum::Cancelled => 0,
+            ReservationStatusEnum::Submitted => 1,
+            ReservationStatusEnum::Confirmed => 2,
+            ReservationStatusEnum::CarTaken => 3,
+            ReservationStatusEnum::CarReturned => 4,
+            ReservationStatusEnum::Incident => 5,
+        };
     }
 }

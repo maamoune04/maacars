@@ -4,7 +4,7 @@ namespace App\Enum;
 
 enum ReservationStatusEnum
 {
-    case Cancel;
+    case Cancelled;
     case Submitted;
     case Confirmed;
     case CarTaken;

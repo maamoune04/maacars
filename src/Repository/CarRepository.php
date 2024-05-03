@@ -3,6 +3,9 @@
 namespace App\Repository;
 
 use App\Entity\Car;
+use App\Entity\Reservation;
+use App\Enum\ReservationStatusEnum;
+use DateTime;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -16,28 +19,28 @@ class CarRepository extends ServiceEntityRepository
         parent::__construct($registry, Car::class);
     }
 
-    //    /**
-    //     * @return Car[] Returns an array of Car objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('c')
-    //            ->andWhere('c.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('c.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
+    /**
+     * Check if a car is available for a given period
+     * @param Car $car
+     * @param DateTime $startDate
+     * @param DateTime $endDate
+     * @return bool
+     */
+    public function isCarAvailable(Car $car, DateTime $startDate, DateTime $endDate): bool
+    {
+        $qb = $this->createQueryBuilder('c')
+            ->select('COUNT(r.id)')
+            ->join('c.reservations', 'r')
+            ->where('r.startDate <= :endDate')
+            ->andWhere('r.endDate >= :startDate')
+            ->andWhere('c = :car')
+            ->andWhere('r.status != :status')
+            ->setParameter('startDate', $startDate)
+            ->setParameter('endDate', $endDate)
+            ->setParameter('car', $car)
+            ->setParameter('status', Reservation::getStatusByEnum(ReservationStatusEnum::Cancelled))
+        ;
 
-    //    public function findOneBySomeField($value): ?Car
-    //    {
-    //        return $this->createQueryBuilder('c')
-    //            ->andWhere('c.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+        return $qb->getQuery()->getSingleScalarResult() === 0;
+    }
 }

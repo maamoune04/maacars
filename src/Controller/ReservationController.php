@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\DTO\ReservationDTO;
+use App\Entity\Reservation;
 use App\Repository\ReservationRepository;
 use App\Service\ReservationService;
 use Exception;
@@ -22,7 +23,7 @@ class ReservationController extends AbstractController
     /**
      * @throws Exception
      */
-    public function add(Request $request, SerializerInterface $serializer): JsonResponse
+    public function add(Request $request, SerializerInterface $serializer): Reservation|JsonResponse
     {
         $reservationDto = $serializer->deserialize($request->getContent(), ReservationDTO::class, 'json');
 
@@ -35,9 +36,7 @@ class ReservationController extends AbstractController
             ], Response::HTTP_BAD_REQUEST);
         }
 
-        $reservation = $this->reservationService->addReservation($reservationDto);
-
-        return $this->json($reservation, Response::HTTP_CREATED);
+        return $this->reservationService->addReservation($reservationDto);
     }
 
     public function userReservations($id): JsonResponse

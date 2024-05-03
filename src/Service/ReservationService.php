@@ -53,6 +53,7 @@ class ReservationService
             $startDate = new DateTime($reservationDTO->getStartDate());
         } catch (Exception $e) {
             $errors['startDate'] = 'Invalid start date, format must be Y-m-d';
+            $startDate = null;
         }
 
         if (empty($reservationDTO->getEndDate())) {
@@ -63,10 +64,11 @@ class ReservationService
             $endDate = new DateTime($reservationDTO->getEndDate());
         } catch (Exception $e) {
             $errors['endDate'] = 'Invalid end date, format must be Y-m-d';
+            $endDate = null;
         }
 
 
-        if (isset($startDate) && isset($endDate) && $startDate > $endDate) {
+        if ($startDate && $endDate && $startDate > $endDate) {
             $errors['endDate'] = 'End date must be greater than start date';
         }
 
@@ -78,6 +80,13 @@ class ReservationService
 
         if (!empty($reservationDTO->getCars()) && !$this->carRepository->find($reservationDTO->getCars())) {
             $errors['cars'] = 'Car not found';
+        }
+
+        //if we have no errors we can check if the car is available
+        if (empty($errors) && $startDate && $endDate) {
+            if (!$this->carRepository->isCarAvailable($this->carRepository->find($reservationDTO->getCars()), $startDate, $endDate)) {
+                $errors['cars'] = 'Car not available for the given period';
+            }
         }
 
         return $errors;
