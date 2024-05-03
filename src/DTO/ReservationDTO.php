@@ -1,13 +1,22 @@
 <?php
 
 namespace App\DTO;
+use Symfony\Component\Validator\Constraints as Assert;
+
 class ReservationDTO
 {
+    #[Assert\NotBlank]
+    #[Assert\Date]
     private string $startDate;
 
+    #[Assert\NotBlank]
+    #[Assert\Date]
+    #[Assert\GreaterThan(propertyPath: 'startDate')]
     private string $endDate;
 
-    private int $cars;
+    #[Assert\NotBlank]
+    #[Assert\Type('integer')]
+    private int $car;
 
     public function getStartDate(): string
     {
@@ -31,14 +40,14 @@ class ReservationDTO
         return $this;
     }
 
-    public function getCars(): int
+    public function getCar(): int
     {
-        return $this->cars;
+        return $this->car;
     }
 
-    public function setCars(int $cars): self
+    public function setCar(int $car): self
     {
-        $this->cars = $cars;
+        $this->car = $car;
         return $this;
     }
 }

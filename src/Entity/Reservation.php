@@ -40,7 +40,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                                 'properties' => [
                                     'startDate' => ['type' => 'string', 'format' => 'date'],
                                     'endDate' => ['type' => 'string', 'format' => 'date'],
-                                    'cars' => ['type' => 'integer', 'example' => 1,],
+                                    'car' => ['type' => 'integer', 'example' => 1,],
                                 ],
                             ],
                         ],
@@ -48,6 +48,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                 ],
             ],
             read: false,
+            deserialize: false,
             write: false,
             name: 'reservations_add',
         ),

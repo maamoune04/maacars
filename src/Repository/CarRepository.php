@@ -21,13 +21,18 @@ class CarRepository extends ServiceEntityRepository
 
     /**
      * Check if a car is available for a given period
-     * @param Car $car
-     * @param DateTime $startDate
-     * @param DateTime $endDate
+     * @param Car|int $car
+     * @param string $startDate
+     * @param string $endDate
      * @return bool
      */
-    public function isCarAvailable(Car $car, DateTime $startDate, DateTime $endDate): bool
+    public function isCarAvailable(Car|int $car, string $startDate, string $endDate): bool
     {
+
+        if ($car instanceof Car) {
+            $car = $car->getId();
+        }
+
         $qb = $this->createQueryBuilder('c')
             ->select('COUNT(r.id)')
             ->join('c.reservations', 'r')
