@@ -50,8 +50,18 @@ class ReservationController extends AbstractController
         return $this->reservationService->addReservation($reservationDto);
     }
 
-    public function userReservations($id): JsonResponse
+    /**
+     * Api get all reservations for a user
+     * @param $id
+     * @return array
+     */
+    public function userReservations($id): array
     {
-        return $this->json($this->reservationRepository->findBy(['user' => $id]));
+        if (!$this->isGranted('ROLE_ADMIN') && $this->getUser()->getId() != $id)
+        {
+            throw $this->createAccessDeniedException('You can only see your own reservations');
+        }
+
+        return $this->reservationRepository->findBy(['user' => $id]);
     }
 }

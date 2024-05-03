@@ -70,6 +70,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                     ],
                 ],
             ],
+            normalizationContext: ['groups' => ['reservation:collection:read']],
             read: false,
         ),
     ],
