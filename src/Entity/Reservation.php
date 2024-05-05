@@ -19,6 +19,7 @@ use Doctrine\ORM\Mapping as ORM;
 use InvalidArgumentException;
 use Symfony\Component\Serializer\Attribute\Context;
 use Symfony\Component\Serializer\Attribute\Groups;
+use Symfony\Component\Serializer\Attribute\Ignore;
 use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -272,6 +273,7 @@ class Reservation
      * @param ReservationStatusEnum $status
      * @return int
      */
+    #[Ignore]
     public static function getStatusByEnum(ReservationStatusEnum $status): int
     {
         return match ($status) {
