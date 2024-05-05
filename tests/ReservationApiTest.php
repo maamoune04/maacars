@@ -127,7 +127,8 @@ class ReservationApiTest extends ApiTestCase
      */
     public function testReservationCarNotAvailable() : void
     {
-        $reservationExist = ReservationFactory::repository()->findOneBy([], ['id' => 'ASC']);
+        ReservationFactory::new()->create();
+        $reservationExist = ReservationFactory::repository()->findOneBy([], ['id' => 'DESC']);
 
         $client = static::createClient();
         $client->request('POST', '/api/reservations', ['json' => [
